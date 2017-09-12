@@ -1,4 +1,4 @@
-# :link: Ligoj Google VM plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-vm-google/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-vm-google)
+# :link: Ligoj Google VM plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-vm-google/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-vm-google) [![Download](https://api.bintray.com/packages/ligoj/maven-repo/plugin-vm-google/images/download.svg) ](https://bintray.com/ligoj/maven-repo/plugin-vm-google/_latestVersion)
 
 [![Build Status](https://travis-ci.org/ligoj/plugin-vm-google.svg?branch=master)](https://travis-ci.org/ligoj/plugin-vm-google)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-vm-google.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-vm-google)
