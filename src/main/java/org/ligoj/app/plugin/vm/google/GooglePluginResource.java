@@ -29,6 +29,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.ligoj.app.api.SubscriptionStatusWithData;
+import org.ligoj.app.plugin.vm.Vm;
 import org.ligoj.app.plugin.vm.VmResource;
 import org.ligoj.app.plugin.vm.VmServicePlugin;
 import org.ligoj.app.plugin.vm.dao.VmScheduleRepository;
@@ -256,12 +257,12 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	/**
 	 * Cache the API token.
 	 */
-	protected String authenticate(final String url, final String authentication, final VCloudCurlProcessor processor) {
+	protected String authenticate(final String url, final String authentication, final GoogleCurlProcessor processor) {
 		return curlCacheToken.getTokenCache(GooglePluginResource.class, url + "##" + authentication, k -> {
 
 			// Authentication request
 			final List<CurlRequest> requests = new ArrayList<>();
-			requests.add(new CurlRequest(HttpMethod.POST, url, null, VCloudCurlProcessor.LOGIN_CALLBACK, "Authorization:Basic " + authentication));
+			requests.add(new CurlRequest(HttpMethod.POST, url, null, GoogleCurlProcessor.LOGIN_CALLBACK, "Authorization:Basic " + authentication));
 			processor.process(requests);
 			return processor.token;
 		}, retries, () -> new ValidationJsonException(PARAMETER_URL, "vcloud-login"));
@@ -270,7 +271,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	/**
 	 * Prepare an authenticated connection to vCloud. The given processor would be updated with the security token.
 	 */
-	protected void authenticate(final Map<String, String> parameters, final VCloudCurlProcessor processor) {
+	protected void authenticate(final Map<String, String> parameters, final GoogleCurlProcessor processor) {
 		final String user = parameters.get(PARAMETER_USER);
 		final String password = StringUtils.trimToEmpty(parameters.get(PARAMETER_PASSWORD));
 		final String organization = StringUtils.trimToEmpty(parameters.get(PARAMETER_ORGANIZATION));
@@ -283,14 +284,8 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 		processor.setToken(authenticate(url, authentication, processor));
 	}
 
-	/**
-	 * Validate the VM configuration.
-	 * 
-	 * @param parameters
-	 *            the space parameters.
-	 * @return Virtual Machine description.
-	 */
-	protected Vm validateVm(final Map<String, String> parameters) throws SAXException, IOException, ParserConfigurationException {
+	@Override
+	public Vm getVmDetails(final Map<String, String> parameters) throws SAXException, IOException, ParserConfigurationException {
 
 		final String id = parameters.get(PARAMETER_VM);
 		// Get the VM if exists
@@ -307,7 +302,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	@Override
 	public void link(final int subscription) throws Exception {
 		// Validate the virtual machine name
-		validateVm(subscriptionResource.getParameters(subscription));
+		getVmDetails(subscriptionResource.getParameters(subscription));
 	}
 
 	/**
@@ -341,7 +336,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	@Produces("image/png")
 	public StreamingOutput getConsole(@PathParam("subscription") final int subscription) {
 		final Map<String, String> parameters = subscriptionResource.getParameters(subscription);
-		final VCloudCurlProcessor processor = new VCloudCurlProcessor();
+		final GoogleCurlProcessor processor = new GoogleCurlProcessor();
 		authenticate(parameters, processor);
 
 		// Get the screen thumbnail
@@ -370,12 +365,10 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 		result.setDescription(record.getAttribute("guestOs"));
 
 		// Optional attributes
-		result.setStorageProfileName(record.getAttribute("storageProfileName"));
 		result.setStatus(EnumUtils.getEnum(VmStatus.class, record.getAttribute("status")));
-		result.setNumberOfCpus(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("numberOfCpus"))));
+		result.setCpu(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("numberOfCpus"))));
 		result.setBusy(Boolean.parseBoolean(ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isBusy")), "false")));
-		result.setContainerName(StringUtils.trimToNull(record.getAttribute("containerName")));
-		result.setMemoryMB(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("memoryMB"))));
+		result.setRam(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("memoryMB"))));
 		result.setDeployed(Boolean.parseBoolean(ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isDeployed")), "false")));
 		return result;
 	}
@@ -401,7 +394,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	 * Authentication is started from there.
 	 */
 	protected String authenticateAndExecute(final Map<String, String> parameters, final String method, final String resource) {
-		final VCloudCurlProcessor processor = new VCloudCurlProcessor();
+		final GoogleCurlProcessor processor = new GoogleCurlProcessor();
 		authenticate(parameters, processor);
 		return execute(processor, method, parameters.get(PARAMETER_URL), resource);
 	}
@@ -466,7 +459,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	@Override
 	public SubscriptionStatusWithData checkSubscriptionStatus(final int subscription, final String node, final Map<String, String> parameters) throws Exception { // NOSONAR
 		final SubscriptionStatusWithData status = new SubscriptionStatusWithData();
-		status.put("vm", validateVm(parameters));
+		status.put("vm", getVmDetails(parameters));
 		status.put("schedules", vmScheduleRepository.countBySubscription(subscription));
 		return status;
 	}
@@ -477,7 +470,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 		final String vmUrl = "/vApp/vm-" + parameters.get(PARAMETER_VM);
 
 		// First get VM state
-		final Vm vm = validateVm(parameters);
+		final Vm vm = getVmDetails(parameters);
 		final VmStatus status = vm.getStatus();
 
 		// Get the right operation depending on the current state
@@ -502,7 +495,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 			request.setSaveResponse(true);
 
 			// Use the preempted authentication
-			final VCloudCurlProcessor processor = new VCloudCurlProcessor();
+			final GoogleCurlProcessor processor = new GoogleCurlProcessor();
 			authenticate(parameters, processor);
 
 			// Execute the request

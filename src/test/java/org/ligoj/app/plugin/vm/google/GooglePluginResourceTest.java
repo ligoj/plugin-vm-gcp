@@ -28,6 +28,7 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
+import org.ligoj.app.plugin.vm.Vm;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
 import org.ligoj.app.resource.node.ParameterValueResource;
@@ -117,7 +118,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void validateVmNotFound() throws Exception {
+	public void getVmDetailsNotFound() throws Exception {
 		thrown.expect(ValidationJsonException.class);
 		thrown.expect(MatcherUtil.validationMatcher(GooglePluginResource.PARAMETER_VM, "vcloud-vm"));
 		prepareMockHome();
@@ -128,28 +129,26 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 
 		final Map<String, String> parameters = pvResource.getNodeParameters("service:vm:vcloud:obs-fca-info");
 		parameters.put(GooglePluginResource.PARAMETER_VM, "0");
-		resource.validateVm(parameters);
+		resource.getVmDetails(parameters);
 	}
 
 	@Test
-	public void validateVm() throws Exception {
+	public void getVmDetails() throws Exception {
 		prepareMockItem();
 
 		final Map<String, String> parameters = pvResource.getNodeParameters("service:vm:vcloud:obs-fca-info");
 		parameters.put(GooglePluginResource.PARAMETER_VM, "75aa69b4-8cff-40cd-9338-9abafc7d5935");
-		final Vm vm = resource.validateVm(parameters);
+		final Vm vm = resource.getVmDetails(parameters);
 		checkVm(vm);
 		Assert.assertTrue(vm.isDeployed());
 	}
 
 	private void checkVm(final Vm item) {
 		checkItem(item);
-		Assert.assertEquals("High Performances", item.getStorageProfileName());
 		Assert.assertEquals(VmStatus.POWERED_OFF, item.getStatus());
-		Assert.assertEquals(6, item.getNumberOfCpus());
+		Assert.assertEquals(6, item.getCpu());
 		Assert.assertFalse(item.isBusy());
-		Assert.assertEquals("vApp_BPR", item.getContainerName());
-		Assert.assertEquals(28672, item.getMemoryMB());
+		Assert.assertEquals(28672, item.getRam());
 	}
 
 	@Test

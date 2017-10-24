@@ -9,12 +9,12 @@ import lombok.Setter;
 /**
  * vCloud Curl processor.
  */
-public class VCloudCurlProcessor extends CurlProcessor {
+public class GoogleCurlProcessor extends CurlProcessor {
 
 	/**
 	 * Special callback for vCloud login check.
 	 */
-	public static final HttpResponseCallback LOGIN_CALLBACK = new VCloudLoginHttpResponseCallback();
+	public static final HttpResponseCallback LOGIN_CALLBACK = new GoogleLoginHttpResponseCallback();
 
 	/**
 	 * Token used to authenticate request

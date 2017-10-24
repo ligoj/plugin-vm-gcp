@@ -11,7 +11,7 @@ import org.ligoj.app.resource.plugin.DefaultHttpResponseCallback;
 /**
  * vCloud login response handler saving the "x-vcloud-authorization".
  */
-public class VCloudLoginHttpResponseCallback extends DefaultHttpResponseCallback {
+public class GoogleLoginHttpResponseCallback extends DefaultHttpResponseCallback {
 
 	@Override
 	public boolean onResponse(final CurlRequest request, final CloseableHttpResponse response) throws IOException {
@@ -23,7 +23,7 @@ public class VCloudLoginHttpResponseCallback extends DefaultHttpResponseCallback
 					.getValue();
 
 			// Save this token in the associated processor for next requests
-			((VCloudCurlProcessor) request.getProcessor()).setToken(token);
+			((GoogleCurlProcessor) request.getProcessor()).setToken(token);
 		}
 		return result;
 	}
