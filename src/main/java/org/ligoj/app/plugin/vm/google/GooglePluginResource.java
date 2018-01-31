@@ -35,10 +35,11 @@ import org.ligoj.app.plugin.vm.VmServicePlugin;
 import org.ligoj.app.plugin.vm.dao.VmScheduleRepository;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
-import org.ligoj.app.resource.plugin.AbstractXmlApiToolPluginResource;
+import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.app.resource.plugin.CurlCacheToken;
 import org.ligoj.app.resource.plugin.CurlProcessor;
 import org.ligoj.app.resource.plugin.CurlRequest;
+import org.ligoj.app.resource.plugin.XmlUtils;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class GooglePluginResource extends AbstractXmlApiToolPluginResource implements VmServicePlugin {
+public class GooglePluginResource extends AbstractToolPluginResource implements VmServicePlugin {
 
 	/**
 	 * Plug-in key.
@@ -254,6 +255,9 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	@Value("${saas.service-vm-vcloud-auth-retries:2}")
 	private int retries;
 
+	@Autowired
+	protected XmlUtils xml;
+
 	/**
 	 * Cache the API token.
 	 */
@@ -377,7 +381,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	 * Build described beans from a XML result.
 	 */
 	private List<Vm> toVms(final String vmAsXml) throws SAXException, IOException, ParserConfigurationException {
-		final NodeList tags = getTags(vmAsXml, "VMRecord");
+		final NodeList tags = xml.getTags(vmAsXml, "VMRecord");
 		return IntStream.range(0, tags.getLength()).mapToObj(tags::item).map(n -> (Element) n).map(this::toVm).collect(Collectors.toList());
 	}
 
@@ -431,7 +435,7 @@ public class GooglePluginResource extends AbstractXmlApiToolPluginResource imple
 	@Override
 	public String getVersion(final Map<String, String> parameters) throws Exception {
 		return StringUtils
-				.trimToNull(getTags(ObjectUtils.defaultIfNull(getVCloudResource(parameters, "/admin"), "<a><Description/></a>"), "Description")
+				.trimToNull(xml.getTags(ObjectUtils.defaultIfNull(getVCloudResource(parameters, "/admin"), "<a><Description/></a>"), "Description")
 						.item(0).getTextContent());
 	}
 
