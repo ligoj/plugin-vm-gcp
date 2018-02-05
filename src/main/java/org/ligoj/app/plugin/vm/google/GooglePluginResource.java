@@ -440,7 +440,7 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	}
 
 	@Override
-	public String getLastVersion() throws Exception {
+	public String getLastVersion() {
 		// Get the download json from the default repository
 		final String portletVersions = new CurlProcessor().get(
 				"https://my.vmware.com/web/vmware/downloads?p_p_id=ProductIndexPortlet_WAR_itdownloadsportlet&p_p_lifecycle=2&p_p_resource_id=allProducts");

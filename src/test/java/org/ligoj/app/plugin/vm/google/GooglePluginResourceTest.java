@@ -100,7 +100,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getLastVersion() throws Exception {
+	public void getLastVersion() {
 		final String lastVersion = resource.getLastVersion();
 		Assertions.assertNotNull(lastVersion);
 		Assertions.assertTrue(lastVersion.compareTo("6.0") >= 0);
@@ -119,7 +119,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getVmDetailsNotFound() throws Exception {
+	public void getVmDetailsNotFound() {
 		prepareMockHome();
 
 		// Not find VM
@@ -188,7 +188,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void checkStatusAuthenticationFailed() throws Exception {
+	public void checkStatusAuthenticationFailed() {
 		httpServer.stubFor(post(urlPathEqualTo("/sessions")).willReturn(aResponse().withStatus(HttpStatus.SC_FORBIDDEN)));
 		httpServer.start();
 		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
@@ -211,7 +211,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void checkStatusNotAdmin() throws Exception {
+	public void checkStatusNotAdmin() {
 		prepareMockHome();
 		httpServer.start();
 		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
@@ -220,7 +220,7 @@ public class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void checkStatusNotAccess() throws Exception {
+	public void checkStatusNotAccess() {
 		httpServer.stubFor(post(urlPathEqualTo("/sessions"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withHeader("x-vcloud-authorization", "token")));
 		httpServer.start();
