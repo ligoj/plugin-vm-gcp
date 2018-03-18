@@ -6,8 +6,6 @@
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-vm-google/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-vm-google)
 [![Build Status](https://ci.appveyor.com/api/projects/status/i916ynpxovg8leek/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-vm-google/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/plugin-vm-google/badge.svg?branch=master)](https://coveralls.io/github/ligoj/plugin-vm-google?branch=master)
-[![Dependency Status](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978/badge.svg?style=flat)](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978)
-[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.ligoj.plugin:plugin-vm-google)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-vm-google)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9edb019931654796991a4cf807340c97)](https://www.codacy.com/app/ligoj/plugin-vm-google?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-vm-google&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-vm-google/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-vm-google)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
