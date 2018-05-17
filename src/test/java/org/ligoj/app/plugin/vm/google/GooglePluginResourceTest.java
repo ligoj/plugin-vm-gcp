@@ -28,7 +28,7 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.vm.Vm;
+import org.ligoj.app.plugin.vm.execution.Vm;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
 import org.ligoj.app.resource.node.ParameterValueResource;

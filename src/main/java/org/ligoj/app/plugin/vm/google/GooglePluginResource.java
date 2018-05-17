@@ -29,10 +29,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.ligoj.app.api.SubscriptionStatusWithData;
-import org.ligoj.app.plugin.vm.Vm;
 import org.ligoj.app.plugin.vm.VmResource;
-import org.ligoj.app.plugin.vm.VmServicePlugin;
 import org.ligoj.app.plugin.vm.dao.VmScheduleRepository;
+import org.ligoj.app.plugin.vm.execution.Vm;
+import org.ligoj.app.plugin.vm.execution.VmExecutionServicePlugin;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
@@ -58,7 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-public class GooglePluginResource extends AbstractToolPluginResource implements VmServicePlugin {
+public class GooglePluginResource extends AbstractToolPluginResource implements VmExecutionServicePlugin {
 
 	/**
 	 * Plug-in key.
