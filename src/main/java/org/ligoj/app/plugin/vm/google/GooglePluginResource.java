@@ -72,7 +72,7 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 
 	/**
 	 * vCloud API base URL.
-	 * 
+	 *
 	 * @see "https://flexible-computing-advanced.orange-business.com/api"
 	 */
 	public static final String PARAMETER_URL = KEY + ":url";
@@ -113,8 +113,7 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 * <TH>operation demandée</TH>
 	 * <TH>operation exécutée</TH>
 	 * </TR>
-	 * </THEAD>
-	 * <TBODY>
+	 * </THEAD> <TBODY>
 	 * <TR>
 	 * <TD>off</TD>
 	 * <TD>shutdown</TD>
@@ -208,11 +207,12 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 * </TBODY>
 	 * </TABLE>
 	 */
-	private static final Map<VmStatus, Map<VmOperation, VmOperation>> FAILSAFE_OPERATIONS = new EnumMap<>(VmStatus.class);
+	private static final Map<VmStatus, Map<VmOperation, VmOperation>> FAILSAFE_OPERATIONS = new EnumMap<>(
+			VmStatus.class);
 
 	/**
 	 * Register a mapping Status+operation to operation.
-	 * 
+	 *
 	 * @param status
 	 *            The current status.
 	 * @param operation
@@ -220,7 +220,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 * @param operationFailSafe
 	 *            The computed operation.
 	 */
-	private static void registerOperation(final VmStatus status, final VmOperation operation, final VmOperation operationFailSafe) {
+	private static void registerOperation(final VmStatus status, final VmOperation operation,
+			final VmOperation operationFailSafe) {
 		FAILSAFE_OPERATIONS.computeIfAbsent(status, s -> new EnumMap<>(VmOperation.class));
 		FAILSAFE_OPERATIONS.get(status).put(operation, operationFailSafe);
 	}
@@ -266,7 +267,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 
 			// Authentication request
 			final List<CurlRequest> requests = new ArrayList<>();
-			requests.add(new CurlRequest(HttpMethod.POST, url, null, GoogleCurlProcessor.LOGIN_CALLBACK, "Authorization:Basic " + authentication));
+			requests.add(new CurlRequest(HttpMethod.POST, url, null, GoogleCurlProcessor.LOGIN_CALLBACK,
+					"Authorization:Basic " + authentication));
 			processor.process(requests);
 			return processor.token;
 		}, retries, () -> new ValidationJsonException(PARAMETER_URL, "vcloud-login"));
@@ -282,18 +284,21 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 		final String url = StringUtils.appendIfMissing(parameters.get(PARAMETER_URL), "/") + "sessions";
 
 		// Encode the authentication 'user@organization:password'
-		final String authentication = Base64.encodeBase64String((user + "@" + organization + ":" + password).getBytes(StandardCharsets.UTF_8));
+		final String authentication = Base64
+				.encodeBase64String((user + "@" + organization + ":" + password).getBytes(StandardCharsets.UTF_8));
 
 		// Authentication request using cache
 		processor.setToken(authenticate(url, authentication, processor));
 	}
 
 	@Override
-	public Vm getVmDetails(final Map<String, String> parameters) throws SAXException, IOException, ParserConfigurationException {
+	public Vm getVmDetails(final Map<String, String> parameters)
+			throws SAXException, IOException, ParserConfigurationException {
 
 		final String id = parameters.get(PARAMETER_VM);
 		// Get the VM if exists
-		final List<Vm> vms = toVms(getVCloudResource(parameters, "/query?type=vm&format=idrecords&filter=id==urn:vcloud:vm:" + id + "&pageSize=1"));
+		final List<Vm> vms = toVms(getVCloudResource(parameters,
+				"/query?type=vm&format=idrecords&filter=id==urn:vcloud:vm:" + id + "&pageSize=1"));
 
 		// Check the VM has been found
 		if (vms.isEmpty()) {
@@ -311,7 +316,7 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 
 	/**
 	 * Find the virtual machines matching to the given criteria. Look into virtual machine name only.
-	 * 
+	 *
 	 * @param node
 	 *            the node to be tested with given parameters.
 	 * @param criteria
@@ -324,13 +329,14 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	public List<Vm> findAllByName(@PathParam("node") final String node, @PathParam("criteria") final String criteria)
 			throws IOException, SAXException, ParserConfigurationException {
 		// Get the VMs and parse them
-		return toVms(getVCloudResource(pvResource.getNodeParameters(node),
-				"/query?type=vm&format=idrecords&filter=name==*" + criteria + "*&sortAsc=name&fields=name,guestOs&pageSize=10"));
+		return toVms(
+				getVCloudResource(pvResource.getNodeParameters(node), "/query?type=vm&format=idrecords&filter=name==*"
+						+ criteria + "*&sortAsc=name&fields=name,guestOs&pageSize=10"));
 	}
 
 	/**
 	 * Return a snapshot of the console.
-	 * 
+	 *
 	 * @param subscription
 	 *            the valid screenshot of the console.
 	 * @return the valid screenshot of the console.
@@ -345,8 +351,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 
 		// Get the screen thumbnail
 		return output -> {
-			final String url = StringUtils.appendIfMissing(parameters.get(PARAMETER_URL), "/") + "vApp/vm-" + parameters.get(PARAMETER_VM)
-					+ "/screen";
+			final String url = StringUtils.appendIfMissing(parameters.get(PARAMETER_URL), "/") + "vApp/vm-"
+					+ parameters.get(PARAMETER_VM) + "/screen";
 			final CurlRequest curlRequest = new CurlRequest("GET", url, null, (request, response) -> {
 				if (response.getStatusLine().getStatusCode() == HttpServletResponse.SC_OK) {
 					// Copy the stream
@@ -371,9 +377,11 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 		// Optional attributes
 		result.setStatus(EnumUtils.getEnum(VmStatus.class, record.getAttribute("status")));
 		result.setCpu(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("numberOfCpus"))));
-		result.setBusy(Boolean.parseBoolean(ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isBusy")), "false")));
+		result.setBusy(Boolean.parseBoolean(
+				ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isBusy")), "false")));
 		result.setRam(NumberUtils.toInt(StringUtils.trimToNull(record.getAttribute("memoryMB"))));
-		result.setDeployed(Boolean.parseBoolean(ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isDeployed")), "false")));
+		result.setDeployed(Boolean.parseBoolean(
+				ObjectUtils.defaultIfNull(StringUtils.trimToNull(record.getAttribute("isDeployed")), "false")));
 		return result;
 	}
 
@@ -382,7 +390,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 */
 	private List<Vm> toVms(final String vmAsXml) throws SAXException, IOException, ParserConfigurationException {
 		final NodeList tags = xml.getTags(vmAsXml, "VMRecord");
-		return IntStream.range(0, tags.getLength()).mapToObj(tags::item).map(n -> (Element) n).map(this::toVm).collect(Collectors.toList());
+		return IntStream.range(0, tags.getLength()).mapToObj(tags::item).map(n -> (Element) n).map(this::toVm)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -397,7 +406,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 * Return a vCloud's resource after an authentication. Return <code>null</code> when the resource is not found.
 	 * Authentication is started from there.
 	 */
-	protected String authenticateAndExecute(final Map<String, String> parameters, final String method, final String resource) {
+	protected String authenticateAndExecute(final Map<String, String> parameters, final String method,
+			final String resource) {
 		final GoogleCurlProcessor processor = new GoogleCurlProcessor();
 		authenticate(parameters, processor);
 		return execute(processor, method, parameters.get(PARAMETER_URL), resource);
@@ -407,9 +417,11 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	 * Return/execute a vCloud resource. Return <code>null</code> when the resource is not found. Authentication should
 	 * be proceeded before for authenticated query.
 	 */
-	protected String execute(final CurlProcessor processor, final String method, final String url, final String resource) {
+	protected String execute(final CurlProcessor processor, final String method, final String url,
+			final String resource) {
 		// Get the resource using the preempted authentication
-		final CurlRequest request = new CurlRequest(method, StringUtils.appendIfMissing(url, "/") + StringUtils.removeStart(resource, "/"), null);
+		final CurlRequest request = new CurlRequest(method,
+				StringUtils.appendIfMissing(url, "/") + StringUtils.removeStart(resource, "/"), null);
 		request.setSaveResponse(true);
 
 		// Execute the requests
@@ -434,23 +446,26 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 
 	@Override
 	public String getVersion(final Map<String, String> parameters) throws Exception {
-		return StringUtils
-				.trimToNull(xml.getTags(ObjectUtils.defaultIfNull(getVCloudResource(parameters, "/admin"), "<a><Description/></a>"), "Description")
-						.item(0).getTextContent());
+		return StringUtils.trimToNull(
+				xml.getTags(ObjectUtils.defaultIfNull(getVCloudResource(parameters, "/admin"), "<a><Description/></a>"),
+						"Description").item(0).getTextContent());
 	}
 
 	@Override
 	public String getLastVersion() {
 		// Get the download json from the default repository
-		final String portletVersions = new CurlProcessor().get(
-				"https://my.vmware.com/web/vmware/downloads?p_p_id=ProductIndexPortlet_WAR_itdownloadsportlet&p_p_lifecycle=2&p_p_resource_id=allProducts");
+		try (CurlProcessor curl = new CurlProcessor()) {
+			final String portletVersions = curl.get(
+					"https://my.vmware.com/web/vmware/downloads?p_p_id=ProductIndexPortlet_WAR_itdownloadsportlet&p_p_lifecycle=2&p_p_resource_id=allProducts");
 
-		// Extract the version from the rw String, because of the non stable content format, but the links
-		// Search for : "target": "./info/slug/datacenter_cloud_infrastructure/vmware_vcloud_suite/6_0"
-		final int linkIndex = Math.min(
-				ObjectUtils.defaultIfNull(portletVersions, "").indexOf("vmware_vcloud_suite/") + "vmware_vcloud_suite/".length(),
-				portletVersions.length());
-		return portletVersions.substring(linkIndex, Math.max(portletVersions.indexOf('\"', linkIndex), portletVersions.length()));
+			// Extract the version from the rw String, because of the non stable content format, but the links
+			// Search for : "target": "./info/slug/datacenter_cloud_infrastructure/vmware_vcloud_suite/6_0"
+			final int linkIndex = Math
+					.min(ObjectUtils.defaultIfNull(portletVersions, "").indexOf("vmware_vcloud_suite/")
+							+ "vmware_vcloud_suite/".length(), portletVersions.length());
+			return portletVersions.substring(linkIndex,
+					Math.max(portletVersions.indexOf('\"', linkIndex), portletVersions.length()));
+		}
 	}
 
 	@Override
@@ -461,7 +476,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	}
 
 	@Override
-	public SubscriptionStatusWithData checkSubscriptionStatus(final int subscription, final String node, final Map<String, String> parameters) throws Exception { // NOSONAR
+	public SubscriptionStatusWithData checkSubscriptionStatus(final int subscription, final String node,
+			final Map<String, String> parameters) throws Exception { // NOSONAR
 		final SubscriptionStatusWithData status = new SubscriptionStatusWithData();
 		status.put("vm", getVmDetails(parameters));
 		status.put("schedules", vmScheduleRepository.countBySubscription(subscription));
@@ -481,12 +497,13 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 		final VmOperation operationF = failSafeOperation(status, operation);
 		if (operationF == null) {
 			// Final operation is considered as useless
-			log.info("Requested operation {} is marked as useless considering the status {} of vm {}", operation, status,
-					parameters.get(PARAMETER_VM));
+			log.info("Requested operation {} is marked as useless considering the status {} of vm {}", operation,
+					status, parameters.get(PARAMETER_VM));
 			return;
 		}
 
-		final String action = MapUtils.getObject(OPERATION_TO_VCLOUD, operationF, operationF.name().toLowerCase(Locale.ENGLISH));
+		final String action = MapUtils.getObject(OPERATION_TO_VCLOUD, operationF,
+				operationF.name().toLowerCase(Locale.ENGLISH));
 
 		// Check if undeployment is requested to shutdown completely the VM
 		if (operationF == VmOperation.SHUTDOWN || operationF == VmOperation.OFF) {
@@ -509,7 +526,8 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 			checkSchedulerResponse(request.getResponse());
 		} else {
 			// Operation does not require to undeploy the VM
-			checkSchedulerResponse(authenticateAndExecute(parameters, HttpMethod.POST, vmUrl + "/power/action/" + action));
+			checkSchedulerResponse(
+					authenticateAndExecute(parameters, HttpMethod.POST, vmUrl + "/power/action/" + action));
 		}
 	}
 
@@ -526,7 +544,7 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * Decide the best operation suiting to the required operation and depending on the current status of the virtual
 	 * machine.
-	 * 
+	 *
 	 * @param status
 	 *            The current status of the VM.
 	 * @param operation
