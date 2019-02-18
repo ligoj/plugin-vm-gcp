@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/ligoj/plugin-vm-google.svg?branch=master)](https://travis-ci.org/ligoj/plugin-vm-google)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-vm-google.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-vm-google)
-[![Build Status](https://codeship.com/projects/fbd731c0-0035-0135-b01e-4ad94b484645/status?branch=master)](https://codeship.com/projects/212509)
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-vm-google/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-vm-google)
 [![Build Status](https://ci.appveyor.com/api/projects/status/i916ynpxovg8leek/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-vm-google/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/plugin-vm-google/badge.svg?branch=master)](https://coveralls.io/github/ligoj/plugin-vm-google?branch=master)
