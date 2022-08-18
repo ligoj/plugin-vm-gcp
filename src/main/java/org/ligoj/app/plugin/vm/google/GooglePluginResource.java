@@ -33,6 +33,7 @@ import org.ligoj.app.plugin.vm.VmResource;
 import org.ligoj.app.plugin.vm.dao.VmScheduleRepository;
 import org.ligoj.app.plugin.vm.execution.Vm;
 import org.ligoj.app.plugin.vm.execution.VmExecutionServicePlugin;
+import org.ligoj.app.plugin.vm.model.VmExecution;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
@@ -485,9 +486,11 @@ public class GooglePluginResource extends AbstractToolPluginResource implements 
 	}
 
 	@Override
-	public void execute(final int subscription, final VmOperation operation) throws Exception {
-		final Map<String, String> parameters = subscriptionResource.getParametersNoCheck(subscription);
-		final String vmUrl = "/vApp/vm-" + parameters.get(PARAMETER_VM);
+	public void execute(final VmExecution execution) throws Exception {
+		final var subscription = execution.getSubscription().getId();
+		final var parameters = pvResource.getSubscriptionParameters(subscription);
+		final var vmUrl = "/vApp/vm-" + parameters.get(PARAMETER_VM);
+		final var operation = execution.getOperation();
 
 		// First get VM state
 		final Vm vm = getVmDetails(parameters);

@@ -22,12 +22,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.api.SubscriptionStatusWithData;
+import org.ligoj.app.dao.SubscriptionRepository;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.vm.execution.Vm;
+import org.ligoj.app.plugin.vm.model.VmExecution;
 import org.ligoj.app.plugin.vm.model.VmOperation;
 import org.ligoj.app.plugin.vm.model.VmStatus;
 import org.ligoj.app.resource.node.ParameterValueResource;
@@ -60,12 +62,16 @@ class GooglePluginResourceTest extends AbstractServerTest {
 	@Autowired
 	private SubscriptionResource subscriptionResource;
 
+	@Autowired
+	private SubscriptionRepository subscriptionRepository;
+
 	protected int subscription;
 
 	@BeforeEach
 	void prepareData() throws IOException {
 		// Only with Spring context
-		persistEntities("csv", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
+		persistEntities("csv",
+				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
 
@@ -77,8 +83,7 @@ class GooglePluginResourceTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Return the subscription identifier of the given project. Assumes there is
-	 * only one subscription for a service.
+	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	private int getSubscription(final String project) {
 		return getSubscription(project, GooglePluginResource.KEY);
@@ -121,7 +126,8 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Not find VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<a/>")));
+		httpServer.stubFor(
+				get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<a/>")));
 		httpServer.start();
 
 		final Map<String, String> parameters = pvResource.getNodeParameters("service:vm:vcloud:obs-fca-info");
@@ -163,10 +169,12 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a specific VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-				.withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredoff-deployed.xml").getInputStream(),
-						StandardCharsets.UTF_8))));
+		httpServer
+				.stubFor(
+						get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+								.withBody(IOUtils.toString(new ClassPathResource(
+										"mock-server/vcloud/vcloud-query-vm-poweredoff-deployed.xml").getInputStream(),
+										StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
@@ -174,8 +182,10 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a list of VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
-				.toString(new ClassPathResource("mock-server/vcloud/vcloud-query-search.xml").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/vcloud/vcloud-query-search.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
@@ -187,7 +197,8 @@ class GooglePluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void checkStatusAuthenticationFailed() {
-		httpServer.stubFor(post(urlPathEqualTo("/sessions")).willReturn(aResponse().withStatus(HttpStatus.SC_FORBIDDEN)));
+		httpServer
+				.stubFor(post(urlPathEqualTo("/sessions")).willReturn(aResponse().withStatus(HttpStatus.SC_FORBIDDEN)));
 		httpServer.start();
 		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
 			resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
@@ -202,7 +213,8 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/sessions")).inScenario("auth").whenScenarioStateIs("failed")
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withHeader("x-vcloud-authorization", "token")));
 		httpServer.stubFor(get(urlPathEqualTo("/admin")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-				IOUtils.toString(new ClassPathResource("mock-server/vcloud/vcloud-admin.xml").getInputStream(), StandardCharsets.UTF_8))));
+				IOUtils.toString(new ClassPathResource("mock-server/vcloud/vcloud-admin.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 		Assertions.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 		httpServer.start();
 		resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
@@ -232,7 +244,8 @@ class GooglePluginResourceTest extends AbstractServerTest {
 
 		// Version from "/admin"
 		httpServer.stubFor(get(urlPathEqualTo("/admin")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
-				IOUtils.toString(new ClassPathResource("mock-server/vcloud/vcloud-admin.xml").getInputStream(), StandardCharsets.UTF_8))));
+				IOUtils.toString(new ClassPathResource("mock-server/vcloud/vcloud-admin.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
@@ -255,8 +268,10 @@ class GooglePluginResourceTest extends AbstractServerTest {
 	void getConsole() throws Exception {
 		prepareMockHome();
 		httpServer.stubFor(get(urlPathEqualTo("/vApp/vm-75aa69b4-8cff-40cd-9338-9abafc7d5935/screen"))
-				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/vcloud/vcloud-console.png").getInputStream(), StandardCharsets.UTF_8))));
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toString(
+								new ClassPathResource("mock-server/vcloud/vcloud-console.png").getInputStream(),
+								StandardCharsets.UTF_8))));
 		httpServer.start();
 
 		final StreamingOutput imageStream = resource.getConsole(subscription);
@@ -296,7 +311,7 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		httpServer.stubFor(post(urlPathEqualTo("/vApp/vm-75aa69b4-8cff-40cd-9338-9abafc7d5935/power/action/powerOn"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<Task>...</Task>")));
 		prepareMockItem();
-		resource.execute(subscription, VmOperation.ON);
+		resource.execute(newExecution(VmOperation.ON));
 	}
 
 	/**
@@ -307,14 +322,16 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a specific VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-				new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 
 		// Stub the undeploy action
 		httpServer.stubFor(post(urlPathEqualTo("/vApp/vm-75aa69b4-8cff-40cd-9338-9abafc7d5935/action/undeploy"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<Task>...</Task>")));
 		httpServer.start();
-		resource.execute(subscription, VmOperation.SHUTDOWN);
+		resource.execute(newExecution(VmOperation.SHUTDOWN));
 	}
 
 	/**
@@ -325,14 +342,16 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a specific VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-				new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 
 		// Stub the undeploy action
 		httpServer.stubFor(post(urlPathEqualTo("/vApp/vm-75aa69b4-8cff-40cd-9338-9abafc7d5935/action/undeploy"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("<Task>...</Task>")));
 		httpServer.start();
-		resource.execute(subscription, VmOperation.OFF);
+		resource.execute(newExecution(VmOperation.OFF));
 	}
 
 	/**
@@ -343,15 +362,17 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a specific VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-				new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 
 		// Stub the undeploy action
 		httpServer.stubFor(post(urlPathEqualTo("/vApp/vm-75aa69b4-8cff-40cd-9338-9abafc7d5935/action/undeploy"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_BAD_REQUEST).withBody("<Error>...</Error>")));
 		httpServer.start();
 		Assertions.assertEquals("yyyy", Assertions.assertThrows(ValidationJsonException.class, () -> {
-			resource.execute(subscription, VmOperation.OFF);
+			resource.execute(newExecution(VmOperation.OFF));
 		}).getMessage());
 	}
 
@@ -363,10 +384,12 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		prepareMockHome();
 
 		// Find a specific VM
-		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
-				new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(), StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/query")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/vcloud/vcloud-query-vm-poweredon.xml").getInputStream(),
+						StandardCharsets.UTF_8))));
 		httpServer.start();
-		resource.execute(subscription, VmOperation.ON);
+		resource.execute(newExecution(VmOperation.ON));
 	}
 
 	private void checkItem(final IDescribableBean<String> item) {
@@ -375,4 +398,10 @@ class GooglePluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("CentOS 4/5/6/7 (64-bit)", item.getDescription());
 	}
 
+	private VmExecution newExecution(final VmOperation operation) {
+		final var execution = new VmExecution();
+		execution.setSubscription(subscriptionRepository.findOneExpected(subscription));
+		execution.setOperation(operation);
+		return execution;
+	}
 }
